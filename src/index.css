@@ -1,0 +1,416 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Theatrical Hackathon Timer Design System */
+
+@layer base {
+  :root {
+    /* Theater Stage Colors */
+    --background: 280 15% 8%;
+    --foreground: 45 100% 95%;
+
+    --card: 280 20% 12%;
+    --card-foreground: 45 100% 95%;
+
+    --popover: 280 20% 12%;
+    --popover-foreground: 45 100% 95%;
+
+    /* Spotlight & Velvet Theme */
+    --primary: 45 100% 65%;
+    --primary-foreground: 280 15% 8%;
+
+    --secondary: 0 65% 45%;
+    --secondary-foreground: 45 100% 95%;
+
+    /* Curtain Red */
+    --curtain: 0 75% 35%;
+    --curtain-light: 0 65% 45%;
+    
+    /* Stage Lighting */
+    --spotlight: 45 100% 85%;
+    --spotlight-glow: 45 100% 75%;
+    
+    /* Animal Colors */
+    --animal-primary: 120 60% 50%;
+    --animal-secondary: 200 80% 60%;
+    
+    --muted: 280 15% 20%;
+    --muted-foreground: 45 40% 70%;
+
+    --accent: 45 100% 65%;
+    --accent-foreground: 280 15% 8%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 45 100% 95%;
+
+    --border: 280 15% 25%;
+    --input: 280 15% 20%;
+    --ring: 45 100% 65%;
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+/* Perfect Curtain & Stage System */
+@layer components {
+  /* Main curtain styling - starts fully closed */
+  .curtain {
+    background: linear-gradient(135deg, 
+      hsl(var(--curtain)) 0%, 
+      hsl(var(--curtain-light)) 25%,
+      hsl(var(--curtain)) 50%,
+      hsl(var(--curtain-light)) 75%,
+      hsl(var(--curtain)) 100%);
+    position: fixed !important;
+    top: 0 !important;
+    width: 50vw !important;
+    height: 100vh !important;
+    box-shadow: inset -10px 0 20px rgba(0,0,0,0.3), inset 10px 0 20px rgba(0,0,0,0.3);
+    z-index: 30 !important;
+    transform-origin: center;
+    /* Start closed, no transition initially */
+    transition: none;
+  }
+  
+  /* Left curtain starts at left edge, covers left half */
+  .curtain-left {
+    left: 0 !important;
+    transform: translateX(0%) !important;
+  }
+  
+  /* Right curtain starts at center, covers right half */
+  .curtain-right {
+    right: 0 !important;
+    transform: translateX(0%) !important;
+  }
+  
+  /* Animation states - smooth sliding with realistic physics */
+  .curtain-left.sliding {
+    transition: transform 5s cubic-bezier(0.23, 1, 0.32, 1) !important;
+    transform: translateX(-75%) skewX(-5deg) !important;
+  }
+  
+  .curtain-right.sliding {
+    transition: transform 5s cubic-bezier(0.23, 1, 0.32, 1) !important;
+    transform: translateX(75%) skewX(5deg) !important;
+  }
+  
+  /* Final open state - curtains stay at edges permanently */
+  .curtain-left.open {
+    transform: translateX(-75%) skewX(-5deg) !important;
+    transition: none !important;
+  }
+  
+  .curtain-right.open {
+    transform: translateX(75%) skewX(5deg) !important;
+    transition: none !important;
+  }
+  
+  /* Smooth fade out when curtains disappear */
+  .curtain-left.fading {
+    transform: translateX(-75%) skewX(-5deg) !important;
+    opacity: 0 !important;
+    transition: opacity 1s ease-out !important;
+  }
+  
+  .curtain-right.fading {
+    transform: translateX(75%) skewX(5deg) !important;
+    opacity: 0 !important;
+    transition: opacity 1s ease-out !important;
+  }
+  
+  /* Curtain rod and hanging effect */
+  .curtain::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 20px;
+    background: linear-gradient(90deg, 
+      #8B4513 0%, #A0522D 20%, #8B4513 40%, #A0522D 60%, #8B4513 80%, #A0522D 100%);
+    border-bottom: 2px solid #654321;
+    z-index: 10;
+  }
+  
+  /* Fabric texture overlay */
+  .curtain::after {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(
+      90deg,
+      transparent 0px,
+      rgba(255,255,255,0.05) 2px,
+      transparent 4px,
+      rgba(0,0,0,0.1) 6px,
+      transparent 8px
+    );
+    opacity: 0.8;
+  }
+  
+  /* Realistic curtain folds */
+  .curtain-fold {
+    position: absolute;
+    top: 20px;
+    bottom: 0;
+    width: 8%;
+    background: linear-gradient(90deg, 
+      rgba(0,0,0,0.3) 0%, 
+      transparent 40%, 
+      rgba(255,255,255,0.1) 50%, 
+      transparent 60%,
+      rgba(0,0,0,0.3) 100%);
+    transition: all 5s cubic-bezier(0.23, 1, 0.32, 1);
+  }
+  
+  /* Fold animations during sliding */
+  .curtain-left.sliding .curtain-fold {
+    transform: scaleX(0.4) rotateY(30deg);
+    opacity: 0.6;
+    transition: all 5s cubic-bezier(0.23, 1, 0.32, 1);
+  }
+  
+  .curtain-right.sliding .curtain-fold {
+    transform: scaleX(0.4) rotateY(-30deg);
+    opacity: 0.6;
+    transition: all 5s cubic-bezier(0.23, 1, 0.32, 1);
+  }
+  
+  /* Fold final position when open */
+  .curtain-left.open .curtain-fold {
+    transform: scaleX(0.4) rotateY(30deg);
+    opacity: 0.6;
+    transition: none;
+  }
+  
+  .curtain-right.open .curtain-fold {
+    transform: scaleX(0.4) rotateY(-30deg);
+    opacity: 0.6;
+    transition: none;
+  }
+  
+  /* Fold animations during fade out */
+  .curtain-left.fading .curtain-fold {
+    transform: scaleX(0.4) rotateY(30deg);
+    opacity: 0;
+    transition: opacity 1s ease-out;
+  }
+  
+  .curtain-right.fading .curtain-fold {
+    transform: scaleX(0.4) rotateY(-30deg);
+    opacity: 0;
+    transition: opacity 1s ease-out;
+  }
+  
+  /* Stage lighting effect */
+  .stage-spotlight {
+    background: radial-gradient(ellipse 60% 40% at center, 
+      hsl(var(--spotlight) / 0.3) 0%, 
+      hsl(var(--spotlight) / 0.1) 40%, 
+      transparent 70%);
+    transition: opacity 3s ease-in-out;
+    opacity: 0.5;
+  }
+  
+  .stage-spotlight.curtains-open {
+    opacity: 1;
+  }
+  
+  .timer-glow {
+    text-shadow: 0 0 20px hsl(var(--primary)), 0 0 40px hsl(var(--primary));
+  }
+}
+
+/* Dust particles effect when curtains open */
+.dust-particles {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 2s ease-in-out 0.5s;
+}
+
+.dust-particles.visible {
+  opacity: 1;
+}
+
+.dust-particle {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 50%;
+  animation: float-dust 8s linear infinite;
+}
+
+@keyframes float-dust {
+  0% {
+    transform: translateY(100vh) translateX(0) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-10vh) translateX(50px) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+/* Individual dust particle delays and positions */
+.dust-particle:nth-child(1) { left: 10%; animation-delay: 0s; }
+.dust-particle:nth-child(2) { left: 20%; animation-delay: 1s; }
+.dust-particle:nth-child(3) { left: 30%; animation-delay: 2s; }
+.dust-particle:nth-child(4) { left: 40%; animation-delay: 0.5s; }
+.dust-particle:nth-child(5) { left: 50%; animation-delay: 1.5s; }
+.dust-particle:nth-child(6) { left: 60%; animation-delay: 3s; }
+.dust-particle:nth-child(7) { left: 70%; animation-delay: 2.5s; }
+.dust-particle:nth-child(8) { left: 80%; animation-delay: 0.8s; }
+.dust-particle:nth-child(9) { left: 90%; animation-delay: 3.5s; }
+.dust-particle:nth-child(10) { left: 15%; animation-delay: 4s; }
+
+@layer utilities {
+  .gradient-stage {
+    background: radial-gradient(ellipse at center, hsl(var(--background)) 0%, hsl(280 20% 4%) 100%);
+  }
+}
+
+@keyframes shimmer {
+  0%, 100% { transform: translateX(-100%); }
+  50% { transform: translateX(100%); }
+}
+
+@keyframes bounce-gentle {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes fade-in-up {
+  from { 
+    opacity: 0; 
+    transform: translateY(30px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(-100vh) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+@keyframes monkey-swing {
+  0%, 100% { 
+    transform: translateX(-50%) rotate(-15deg);
+  }
+  50% { 
+    transform: translateX(-50%) rotate(15deg);
+  }
+}
+
+@keyframes vine-swing {
+  0%, 100% { 
+    transform: rotate(-8deg);
+  }
+  50% { 
+    transform: rotate(8deg);
+  }
+}
+
+.animate-confetti-fall {
+  animation: confetti-fall 3s linear infinite;
+}
+
+.animate-monkey-swing {
+  animation: monkey-swing 2s ease-in-out infinite;
+}
+
+.animate-vine-swing {
+  animation: vine-swing 2s ease-in-out infinite;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground overflow-hidden;
+    margin: 0;
+    padding: 0;
+    width: 100vw;
+    height: 100vh;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+}
