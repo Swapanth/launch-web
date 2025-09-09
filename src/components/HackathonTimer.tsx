@@ -374,7 +374,7 @@ export const HackathonTimer = () => {
             {/* College Logo */}
            <div className="flex justify-center pt-8 pb-6">
               <img
-                src="/src/imgs/17.png"
+                src="/imgs/17.png"
                 alt="Logo"
                 className="h-20 object-contain"
                 style={{ borderRadius: '50%', marginRight: '-3rem', zIndex: 10, marginTop: '-0.4rem' }}
@@ -439,12 +439,12 @@ export const HackathonTimer = () => {
 
                 <div className="flex justify-between items-center" style={{ marginTop: '-24rem', marginBottom: '-2.4rem', marginLeft: '2rem', marginRight: '2rem' }}>
                   <img
-                    src="/src/imgs/14.png"
+                    src="/imgs/14.png"
                     alt="Image 1"
                     style={{ borderRadius: '50%', height: '21rem', marginBottom: '-2.0rem' }}
                   />
                   <img
-                    src="/src/imgs/15.png"
+                    src="/imgs/15.png"
                     alt="Image 2"
                     style={{ borderRadius: '50%', height: '26rem', marginBottom: '-2.6rem' }}
                   />
@@ -483,7 +483,7 @@ export const HackathonTimer = () => {
             {/* College Logo */}
             <div className="flex justify-center pt-8 pb-6">
               <img
-                src="/src/imgs/17.png"
+                src="/imgs/17.png"
                 alt="Logo"
                 className="h-20 object-contain"
                 style={{ borderRadius: '50%', marginRight: '-3rem', zIndex: 10, marginTop: '-0.4rem' }}
@@ -548,12 +548,12 @@ export const HackathonTimer = () => {
 
                 <div className="flex justify-between items-center" style={{ marginTop: '-24rem', marginBottom: '-2.4rem', marginLeft: '2rem', marginRight: '2rem' }}>
                   <img
-                    src="/src/imgs/14.png"
+                    src="/imgs/14.png"
                     alt="Image 1"
                     style={{ borderRadius: '50%', height: '21rem', marginBottom: '-2.0rem' }}
                   />
                   <img
-                    src="/src/imgs/15.png"
+                    src="/imgs/15.png"
                     alt="Image 2"
                     style={{ borderRadius: '50%', height: '26rem', marginBottom: '-2.6rem' }}
                   />
