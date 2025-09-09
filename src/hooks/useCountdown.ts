@@ -11,7 +11,7 @@ interface CountdownState {
 
 export const useCountdown = (targetDurationHours: number = 24, startTime?: number) => {
   const [countdownState, setCountdownState] = useState<CountdownState>({
-    hours: targetDurationHours,
+    hours: startTime ? targetDurationHours : 0,
     minutes: 0,
     seconds: 0,
     lastHour: targetDurationHours,
@@ -20,15 +20,48 @@ export const useCountdown = (targetDurationHours: number = 24, startTime?: numbe
   });
 
   useEffect(() => {
-    if (!startTime) return;
+    if (!startTime) {
+      // Reset to initial state when no startTime
+      setCountdownState({
+        hours: 0,
+        minutes: 0,
+        seconds: 0,
+        lastHour: targetDurationHours,
+        isCompleted: false,
+        elapsedHours: 0
+      });
+      return;
+    }
+
+    // Set initial countdown state immediately when startTime is set
+    const now = Date.now();
+    const targetDurationMs = targetDurationHours * 60 * 60 * 1000;
+    const endTime = startTime + targetDurationMs;
+    const remainingMs = endTime - now;
+    
+    if (remainingMs > 0) {
+      const remainingSeconds = Math.floor(remainingMs / 1000);
+      const hours = Math.floor(remainingSeconds / 3600);
+      const minutes = Math.floor((remainingSeconds % 3600) / 60);
+      const seconds = remainingSeconds % 60;
+      
+      setCountdownState({
+        hours,
+        minutes,
+        seconds,
+        lastHour: targetDurationHours,
+        isCompleted: false,
+        elapsedHours: 0
+      });
+    }
 
     const timer = setInterval(() => {
       const now = Date.now();
-      const elapsedMs = now - startTime;
-      const elapsedSeconds = Math.floor(elapsedMs / 1000);
-      const totalDurationSeconds = targetDurationHours * 60 * 60;
+      const targetDurationMs = targetDurationHours * 60 * 60 * 1000; // Convert hours to milliseconds
+      const endTime = startTime + targetDurationMs;
+      const remainingMs = endTime - now;
       
-      if (elapsedSeconds >= totalDurationSeconds) {
+      if (remainingMs <= 0) {
         setCountdownState(prev => ({
           ...prev,
           hours: 0,
@@ -40,11 +73,14 @@ export const useCountdown = (targetDurationHours: number = 24, startTime?: numbe
         return;
       }
 
-      const remainingSeconds = totalDurationSeconds - elapsedSeconds;
+      const remainingSeconds = Math.floor(remainingMs / 1000);
       const hours = Math.floor(remainingSeconds / 3600);
       const minutes = Math.floor((remainingSeconds % 3600) / 60);
       const seconds = remainingSeconds % 60;
-      const elapsedHours = Math.floor(elapsedSeconds / 3600);
+      
+      // Calculate elapsed time from start
+      const elapsedMs = now - startTime;
+      const elapsedHours = Math.floor(elapsedMs / (1000 * 60 * 60));
 
       setCountdownState(prev => ({
         hours,

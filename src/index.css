@@ -150,6 +150,19 @@
     transform: translateX(75%) skewX(5deg) !important;
   }
   
+  /* Fading state - curtains fade out after sliding */
+  .curtain-left.fading {
+    transition: opacity 1s ease-out !important;
+    transform: translateX(-75%) skewX(-5deg) !important;
+    opacity: 0 !important;
+  }
+  
+  .curtain-right.fading {
+    transition: opacity 1s ease-out !important;
+    transform: translateX(75%) skewX(5deg) !important;
+    opacity: 0 !important;
+  }
+  
   /* Final open state - curtains stay at edges permanently */
   .curtain-left.open {
     transform: translateX(-75%) skewX(-5deg) !important;
@@ -159,19 +172,6 @@
   .curtain-right.open {
     transform: translateX(75%) skewX(5deg) !important;
     transition: none !important;
-  }
-  
-  /* Smooth fade out when curtains disappear */
-  .curtain-left.fading {
-    transform: translateX(-75%) skewX(-5deg) !important;
-    opacity: 0 !important;
-    transition: opacity 1s ease-out !important;
-  }
-  
-  .curtain-right.fading {
-    transform: translateX(75%) skewX(5deg) !important;
-    opacity: 0 !important;
-    transition: opacity 1s ease-out !important;
   }
   
   /* Curtain rod and hanging effect */
@@ -186,6 +186,7 @@
       #8B4513 0%, #A0522D 20%, #8B4513 40%, #A0522D 60%, #8B4513 80%, #A0522D 100%);
     border-bottom: 2px solid #654321;
     z-index: 10;
+    transition: opacity 1s ease-out;
   }
   
   /* Fabric texture overlay */
@@ -205,6 +206,13 @@
       transparent 8px
     );
     opacity: 0.8;
+    transition: opacity 1s ease-out;
+  }
+  
+  /* Fade the curtain rod and texture during fading */
+  .curtain.fading::before,
+  .curtain.fading::after {
+    opacity: 0;
   }
   
   /* Realistic curtain folds */
@@ -235,6 +243,19 @@
     transition: all 5s cubic-bezier(0.23, 1, 0.32, 1);
   }
   
+  /* Fold fading effect */
+  .curtain-left.fading .curtain-fold {
+    transform: scaleX(0.4) rotateY(30deg);
+    opacity: 0;
+    transition: opacity 1s ease-out;
+  }
+  
+  .curtain-right.fading .curtain-fold {
+    transform: scaleX(0.4) rotateY(-30deg);
+    opacity: 0;
+    transition: opacity 1s ease-out;
+  }
+  
   /* Fold final position when open */
   .curtain-left.open .curtain-fold {
     transform: scaleX(0.4) rotateY(30deg);
@@ -246,19 +267,6 @@
     transform: scaleX(0.4) rotateY(-30deg);
     opacity: 0.6;
     transition: none;
-  }
-  
-  /* Fold animations during fade out */
-  .curtain-left.fading .curtain-fold {
-    transform: scaleX(0.4) rotateY(30deg);
-    opacity: 0;
-    transition: opacity 1s ease-out;
-  }
-  
-  .curtain-right.fading .curtain-fold {
-    transform: scaleX(0.4) rotateY(-30deg);
-    opacity: 0;
-    transition: opacity 1s ease-out;
   }
   
   /* Stage lighting effect */

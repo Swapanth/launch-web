@@ -1,7 +1,5 @@
-import { useState, useEffect } from 'react';
-import Lottie from 'lottie-react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { ConfettiEffect } from './ConfettiEffect';
-import { DidYouKnow } from './DidYouKnow';
 import { useCountdown } from '../hooks/useCountdown';
 
 interface TimerState {
@@ -19,19 +17,22 @@ export const HackathonTimer = () => {
   const [showConfetti, setShowConfetti] = useState(false);
   const [showDustParticles, setShowDustParticles] = useState(false);
   const [startTime, setStartTime] = useState<number>(0);
-  const [showDidYouKnow, setShowDidYouKnow] = useState(false);
   const [animationTrigger, setAnimationTrigger] = useState<number>(0);
   const [hasSavedTimer, setHasSavedTimer] = useState(false);
   const [curtainState, setCurtainState] = useState<'closed' | 'opening' | 'fading' | 'open'>('closed');
   const [isSyncedWithGlobal, setIsSyncedWithGlobal] = useState(false);
+  const hasManuallyStarted = useRef(false); // Track if user manually started timer
+
+  // Debug curtain state changes
+  useEffect(() => {
+    console.log('Curtain state changed to:', curtainState);
+  }, [curtainState]);
 
   // Use the new countdown hook
   const countdownState = useCountdown(7, startTime);
   const { hours, minutes, seconds, lastHour, elapsedHours } = countdownState;
 
   const totalSeconds = 7 * 60 * 60; // 7 hours in seconds
-  const animalInterval = 10 * 60; // 10 minutes in seconds
-  const monkeyInterval = 5 * 60; // 5 minutes in seconds
 
   // Global timer API functions
   const checkGlobalTimer = async () => {
@@ -82,9 +83,16 @@ export const HackathonTimer = () => {
 
   // Load saved state on component mount - check global timer first, then local storage
   useEffect(() => {
+    // Don't run if user has manually started the timer
+    if (hasManuallyStarted.current) return;
+
+    let isMounted = true; // Flag to prevent state updates if component unmounts
+
     const loadTimerState = async () => {
       // First, check if there's a global timer running
       const globalTimerState = await checkGlobalTimer();
+
+      if (!isMounted) return; // Component unmounted, don't update state
 
       if (globalTimerState) {
         // Use global timer state
@@ -100,10 +108,7 @@ export const HackathonTimer = () => {
           setCurtainsOpen(true);
           setHasSavedTimer(true);
 
-          // Only show Did You Know card if more than 2 minutes have elapsed
-          if (elapsedSinceStart >= 2 * 60) {
-            setShowDidYouKnow(true);
-          }
+
 
           // Also save to local storage for offline access
           const localState: TimerState = {
@@ -134,10 +139,7 @@ export const HackathonTimer = () => {
             setCurtainsOpen(true);
             setHasSavedTimer(true);
 
-            // Only show Did You Know card if more than 2 minutes have elapsed
-            if (elapsedSinceStart >= 2 * 60) {
-              setShowDidYouKnow(true);
-            }
+
           }
         } catch (error) {
           console.error('Failed to parse saved timer state:', error);
@@ -146,33 +148,42 @@ export const HackathonTimer = () => {
     };
 
     loadTimerState();
-  }, [totalSeconds]);
+
+    return () => {
+      isMounted = false; // Cleanup flag
+    };
+  }, [totalSeconds]); // Include totalSeconds to satisfy lint
 
   // Periodic sync with global timer (every 30 seconds)
   useEffect(() => {
-    if (!isStarted) return;
+    // Only sync if timer is started and curtains are fully open (not during animation)
+    if (!isStarted || curtainState !== 'open') return;
 
     const syncTimer = setInterval(async () => {
-      const globalTimerState = await checkGlobalTimer();
+      try {
+        const globalTimerState = await checkGlobalTimer();
 
-      if (globalTimerState && globalTimerState.startTime !== startTime) {
-        // Global timer has changed, sync with it
-        console.log('Syncing with updated global timer');
-        setStartTime(globalTimerState.startTime);
-        setIsSyncedWithGlobal(true);
+        if (globalTimerState && globalTimerState.startTime !== startTime) {
+          // Global timer has changed, sync with it
+          console.log('Syncing with updated global timer');
+          setStartTime(globalTimerState.startTime);
+          setIsSyncedWithGlobal(true);
 
-        // Update local storage
-        const localState: TimerState = {
-          isStarted: globalTimerState.isStarted,
-          curtainsOpen: globalTimerState.curtainsOpen,
-          startTime: globalTimerState.startTime
-        };
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(localState));
+          // Update local storage
+          const localState: TimerState = {
+            isStarted: globalTimerState.isStarted,
+            curtainsOpen: globalTimerState.curtainsOpen,
+            startTime: globalTimerState.startTime
+          };
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(localState));
+        }
+      } catch (error) {
+        console.error('Error during periodic sync:', error);
       }
     }, 30000); // Check every 30 seconds
 
     return () => clearInterval(syncTimer);
-  }, [isStarted, startTime]);
+  }, [isStarted, startTime, curtainState]);
 
   // Save state to localStorage whenever it changes
   useEffect(() => {
@@ -187,94 +198,47 @@ export const HackathonTimer = () => {
   }, [isStarted, curtainsOpen, startTime]);
 
   // Reset function
-  const resetTimer = () => {
+  const resetTimer = useCallback(() => {
+    console.log('Resetting timer...');
+    hasManuallyStarted.current = false; // Reset the manual start flag
     setIsStarted(false);
     setCurtainsOpen(false);
     setCurtainsOpening(false);
     setCurtainState('closed');
     setShowConfetti(false);
     setShowDustParticles(false);
-    setShowDidYouKnow(false);
     setAnimationTrigger(0);
     setStartTime(0);
     setHasSavedTimer(false);
+    setIsSyncedWithGlobal(false);
     localStorage.removeItem(STORAGE_KEY);
-  };
+    
+    // Also try to clear the global timer
+    setGlobalTimer(0, false, false).catch(console.error);
+  }, []);
 
-  // Animation trigger every 10 minutes for Did You Know card (starting after 2 minutes)
-  useEffect(() => {
-    if (!isStarted) return;
+  const handleStart = useCallback(async () => {
+    // Mark that user has manually started the timer
+    hasManuallyStarted.current = true;
+    
+    // Set the start time immediately to avoid race conditions
+    const timerStartTime = Date.now();
+    setStartTime(timerStartTime);
+    
+    // Start the actual countdown timer immediately
+    setIsStarted(true);
+    setHasSavedTimer(false);
 
-    const timer = setInterval(() => {
-      const now = Date.now();
-      const elapsedSeconds = Math.floor((now - startTime) / 1000);
-
-      // Show Did You Know card only after 2 minutes have elapsed
-      if (elapsedSeconds >= 2 * 60 && !showDidYouKnow) {
-        setShowDidYouKnow(true);
-        setAnimationTrigger(0); // Start with first animation
-      }
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [isStarted, startTime, showDidYouKnow]);
-
-  // Animation trigger every 10 minutes for Did You Know card (after the initial 2-minute delay)
-  useEffect(() => {
-    if (!isStarted || !showDidYouKnow) return;
-
-    const timer = setInterval(() => {
-      const now = Date.now();
-      const elapsedSeconds = Math.floor((now - startTime) / 1000);
-      const tenMinuteInterval = 10 * 60; // 10 minutes
-
-      // Check if we should update the Did You Know animation (every 10 minutes after the 2-minute delay)
-      if (elapsedSeconds >= 2 * 60) {
-        const adjustedElapsed = elapsedSeconds - (2 * 60); // Subtract the initial 2-minute delay
-        if (adjustedElapsed > 0 && adjustedElapsed % tenMinuteInterval === 0) {
-          const animationIndex = Math.floor(adjustedElapsed / tenMinuteInterval);
-          setAnimationTrigger(animationIndex);
-        }
-      }
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [isStarted, startTime, showDidYouKnow]);
-
-  // Handle Enter key press to start and Ctrl+P to reset
-  useEffect(() => {
-    const handleKeyPress = (event: KeyboardEvent) => {
-      if (event.key === 'Enter' && curtainState === 'closed' && !hasSavedTimer) {
-        handleStart();
-      } else if (event.ctrlKey && event.key === 'p') {
-        event.preventDefault(); // Prevent browser print dialog
-        resetTimer();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [curtainState, hasSavedTimer]);
-
-  const handleStart = async () => {
+    // Set the global timer for all users to sync with
+    await setGlobalTimer(timerStartTime, true, false);
+    console.log('Global timer started for all users');
+    
     // Start the perfect curtain sliding animation
     setCurtainState('opening');
     setCurtainsOpening(true);
 
-    // At 2.5 seconds (halfway through curtain animation), start timer and confetti
-    setTimeout(async () => {
-      // Set the start time and start the actual countdown timer at halfway point
-      const now = Date.now();
-      setStartTime(now);
-
-      // Start the actual countdown timer
-      setIsStarted(true);
-      setHasSavedTimer(false);
-
-      // Set the global timer for all users to sync with
-      await setGlobalTimer(now, true, false);
-      console.log('Global timer started for all users');
-
+    // At 2.5 seconds (halfway through curtain animation), show effects
+    setTimeout(() => {
       // Trigger confetti celebration when curtains are halfway
       setShowConfetti(true);
       setTimeout(() => setShowConfetti(false), 4000);
@@ -290,9 +254,7 @@ export const HackathonTimer = () => {
       setCurtainState('fading');
 
       // Update global timer to indicate curtains are open
-      if (startTime > 0) {
-        await setGlobalTimer(startTime, true, true);
-      }
+      await setGlobalTimer(timerStartTime, true, true);
 
       // After fade completes, completely remove curtains
       setTimeout(() => {
@@ -301,7 +263,31 @@ export const HackathonTimer = () => {
         setCurtainsOpening(false);
       }, 1000); // 1 second fade duration
     }, 5000); // Complete curtain animation
-  };
+  }, []);
+
+  // Handle Enter key press to start and multiple reset key combinations
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      // Start timer with Enter
+      if (event.key === 'Enter' && curtainState === 'closed' && !hasSavedTimer) {
+        handleStart();
+      } 
+      // Reset timer with multiple key combinations
+      else if (
+        (event.ctrlKey && event.key.toLowerCase() === 'p') ||
+        (event.ctrlKey && event.key === 'r') ||
+        (event.key === 'Escape') ||
+        (event.key === 'r' && (event.ctrlKey || event.metaKey))
+      ) {
+        event.preventDefault(); // Prevent browser actions
+        console.log('Reset key combination detected:', event.key, 'Ctrl:', event.ctrlKey);
+        resetTimer();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [curtainState, hasSavedTimer, handleStart, resetTimer]);
 
   const formatTimeWithLabels = (hours: number, minutes: number, seconds: number) => {
     // For a 7-hour hackathon, we'll show:
@@ -335,7 +321,7 @@ export const HackathonTimer = () => {
         <>
           {/* Left Curtain - starts covering left half */}
           <div className={`curtain curtain-left ${curtainState === 'opening' ? 'sliding' :
-              curtainState === 'fading' ? 'fading' : ''
+            curtainState === 'fading' ? 'fading' : ''
             }`}>
             {/* Curtain folds for realistic effect */}
             <div className="curtain-fold" style={{ left: '10%' }} />
@@ -348,7 +334,7 @@ export const HackathonTimer = () => {
 
           {/* Right Curtain - starts covering right half */}
           <div className={`curtain curtain-right ${curtainState === 'opening' ? 'sliding' :
-              curtainState === 'fading' ? 'fading' : ''
+            curtainState === 'fading' ? 'fading' : ''
             }`}>
             {/* Curtain folds for realistic effect */}
             <div className="curtain-fold" style={{ right: '10%' }} />
@@ -386,83 +372,18 @@ export const HackathonTimer = () => {
         ) : curtainState === 'opening' || curtainState === 'fading' ? (
           <div className="bg-white min-h-screen w-full flex flex-col">
             {/* College Logo */}
-            <div className="flex justify-center pt-8 pb-6">
+           <div className="flex justify-center pt-8 pb-6">
               <img
-                src="https://srkrec.edu.in/img/srkrec_full_name2.png"
-                alt="SRKREC Logo"
+                src="/src/imgs/17.png"
+                alt="Logo"
                 className="h-20 object-contain"
+                style={{ borderRadius: '50%', marginRight: '-3rem', zIndex: 10, marginTop: '-0.4rem' }}
               />
-            </div>
-
-            {/* Event Details */}
-            <div className="flex-1 flex flex-col justify-center text-center space-y-12">
-              <div className="space-y-6 bg-yellow-400">
-                <h1 className="text-5xl text-green-800 tracking-widest uppercase"
-                  style={{
-                    fontFamily: '"Arial Black", sans-serif',
-                    letterSpacing: '0.1em',
-                    marginTop: '2.5rem'
-                  }}>
-                  AMARAVATI  
-                </h1>
-                <h1 className="text-5xl text-white p-3 bg-red-800 inline-block tracking-widest uppercase"
-                  style={{
-                  fontFamily: '"Arial Black", sans-serif',
-                  letterSpacing: '0.1em',
-                  marginTop: '-0.07rem'
-                  }}>
-                  QUANTUM VALLEY  
-                </h1>
-               <h1 className="text-5xl text-green-800 tracking-widest uppercase"
-                  style={{
-                    fontFamily: '"Arial Black", sans-serif',
-                    letterSpacing: '0.1em',
-                    marginTop: '2.5rem'
-                  }}>
-                  INTERNAL  
-                </h1>
-                <h1 className="text-5xl text-white p-3 bg-red-800 inline-block tracking-widest uppercase"
-                  style={{
-                  fontFamily: '"Arial Black", sans-serif',
-                  letterSpacing: '0.1em',
-                  marginTop: '-0.07rem',
-                  marginBottom: '2.5rem'
-                  }}>
-                  HACKATHON 2025  
-                </h1>
-              </div>
-
-              {/* Timer */}
-              <div className="space-y-6">
-                <div className="flex justify-center items-center gap-8">
-
-                  <div className="flex flex-col items-center">
-                    <div className="text-6xl font-mono font-bold text-blue-600 border-4 border-gray-300 rounded-lg px-4 py-2 bg-gray-50 shadow-lg">7</div>
-                    <div className="text-lg font-medium text-gray-600 mt-2">HOURS</div>
-                  </div>
-                  <div className="flex flex-col items-center">
-                    <div className="text-6xl font-mono font-bold text-blue-600 border-4 border-gray-300 rounded-lg px-4 py-2 bg-gray-50 shadow-lg">00</div>
-                    <div className="text-lg font-medium text-gray-600 mt-2">MINUTES</div>
-                  </div>
-                  <div className="flex flex-col items-center">
-                    <div className="text-6xl font-mono font-bold text-blue-600 border-4 border-gray-300 rounded-lg px-4 py-2 bg-gray-50 shadow-lg">00</div>
-                    <div className="text-lg font-medium text-gray-600 mt-2">SECONDS</div>
-                  </div>
-                </div>
-                <p className="text-1xl font-medium text-gray-800">
-                  Time Remaining
-                </p>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="bg-white min-h-screen w-full flex flex-col">
-            {/* College Logo */}
-            <div className="flex justify-center pt-8 pb-6">
               <img
                 src="https://srkrec.edu.in/img/srkrec_full_name2.png"
                 alt="SRKREC Logo"
-                className="h-14 object-contain"
+                className="object-contain"
+                style={{ height: '4.5rem', marginLeft: '-3rem', marginTop: '-0.4rem' }}
               />
             </div>
 
@@ -475,88 +396,199 @@ export const HackathonTimer = () => {
                     letterSpacing: '0.1em',
                     marginTop: '2.5rem'
                   }}>
-                  AMARAVATI  
+                  AMARAVATI QUANTUM VALLEY
+
                 </h1>
+
+                <br />
                 <h1 className="text-5xl text-white p-3 bg-red-800 inline-block tracking-widest uppercase"
                   style={{
+                    fontFamily: '"Arial Black", sans-serif',
+                    letterSpacing: '0.1em',
+                    marginTop: '-0.07rem',
+                    marginBottom: '2.5rem'
+                  }}>
+                  HACKATHON 2025
+                </h1>
+
+
+
+                <div className="space-y-6" style={{ marginTop: '2rem' }}>
+                  {(() => {
+                    const timeData = formatTimeWithLabels(hours, minutes, seconds);
+                    return (
+                      <div className="flex justify-center items-center gap-8" style={{ marginBottom: '2.6rem' }}>
+
+                        <div className="flex flex-col items-center">
+                          <div className="text-6xl font-system-ui font-bold text-black border-4 border-gray-300 rounded-lg px-4 py-2 bg-gray-50 shadow-lg">{timeData.hours}</div>
+                          <div className="text-lg font-medium text-gray-600 mt-2">HOURS</div>
+                        </div>
+                        <div className="flex flex-col items-center">
+                          <div className="text-6xl font-system-ui font-bold text-black border-4 border-gray-300 rounded-lg px-4 py-2 bg-gray-50 shadow-lg">{timeData.minutes}</div>
+                          <div className="text-lg font-medium text-gray-600 mt-2">MINUTES</div>
+                        </div>
+                        <div className="flex flex-col items-center">
+                          <div className="text-6xl font-system-ui font-bold text-black border-4 border-gray-300 rounded-lg px-4 py-2 bg-gray-50 shadow-lg">{timeData.seconds}</div>
+                          <div className="text-lg font-medium text-gray-600 mt-2">SECONDS</div>
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                </div>
+
+                <div className="flex justify-between items-center" style={{ marginTop: '-24rem', marginBottom: '-2.4rem', marginLeft: '2rem', marginRight: '2rem' }}>
+                  <img
+                    src="/src/imgs/14.png"
+                    alt="Image 1"
+                    style={{ borderRadius: '50%', height: '21rem', marginBottom: '-2.0rem' }}
+                  />
+                  <img
+                    src="/src/imgs/15.png"
+                    alt="Image 2"
+                    style={{ borderRadius: '50%', height: '26rem', marginBottom: '-2.6rem' }}
+                  />
+                </div>
+
+              </div>
+
+              {/* add images in row */}
+
+
+
+
+            </div>
+            <div className="flex-1 flex flex-col justify-center text-center space-y-12 mt--12">
+              <h1 className="text-4xl text-blue-800 tracking-widest uppercase"
+                style={{
                   fontFamily: '"Arial Black", sans-serif',
                   letterSpacing: '0.1em',
-                  marginTop: '-0.07rem'
-                  }}>
-                  QUANTUM VALLEY  
-                </h1>
-               <h1 className="text-5xl text-green-800 tracking-widest uppercase"
+                  marginTop: '2.5rem',
+                  marginLeft: '-3rem'
+                }}>
+                EAST GODAVARI & WEST GODAVARI
+              </h1>
+              <h1 className="text-4xl text-blue-800 tracking-widest uppercase"
+                style={{
+                  fontFamily: '"Arial Black", sans-serif',
+                  letterSpacing: '0.1em',
+                  marginTop: '0.5rem'
+                }}>
+                REGIONAL CENTER <span className="text-red-800 text-6xl">SEMI FINAL</span>
+              </h1>
+            </div>
+          </div>
+        ) : (
+          <div className="bg-white min-h-screen w-full flex flex-col">
+            {/* College Logo */}
+            <div className="flex justify-center pt-8 pb-6">
+              <img
+                src="/src/imgs/17.png"
+                alt="Logo"
+                className="h-20 object-contain"
+                style={{ borderRadius: '50%', marginRight: '-3rem', zIndex: 10, marginTop: '-0.4rem' }}
+              />
+              <img
+                src="https://srkrec.edu.in/img/srkrec_full_name2.png"
+                alt="SRKREC Logo"
+                className="object-contain"
+                style={{ height: '4.5rem', marginLeft: '-3rem', marginTop: '-0.4rem' }}
+              />
+            </div>
+
+            {/* Event Details */}
+            <div className="flex-1 flex flex-col justify-center text-center space-y-12">
+              <div className="space-y-6  bg-yellow-400">
+                <h1 className="text-5xl text-green-800 tracking-widest uppercase"
                   style={{
                     fontFamily: '"Arial Black", sans-serif',
                     letterSpacing: '0.1em',
                     marginTop: '2.5rem'
                   }}>
-                  INTERNAL  
+                  AMARAVATI QUANTUM VALLEY
+
                 </h1>
+
+                <br />
                 <h1 className="text-5xl text-white p-3 bg-red-800 inline-block tracking-widest uppercase"
                   style={{
-                  fontFamily: '"Arial Black", sans-serif',
-                  letterSpacing: '0.1em',
-                  marginTop: '-0.07rem',
-                  marginBottom: '2.5rem'
+                    fontFamily: '"Arial Black", sans-serif',
+                    letterSpacing: '0.1em',
+                    marginTop: '-0.07rem',
+                    marginBottom: '2.5rem'
                   }}>
-                  HACKATHON 2025  
+                  HACKATHON 2025
                 </h1>
-              </div>
 
-              {/* Timer with labels */}
-              <div className="space-y-6">
-                {(() => {
-                  const timeData = formatTimeWithLabels(hours, minutes, seconds);
-                  return (
-                    <div className="flex justify-center items-center gap-8">
 
-                      <div className="flex flex-col items-center">
-                        <div className="text-6xl font-system-ui font-bold text-blue-600 border-4 border-gray-300 rounded-lg px-4 py-2 bg-gray-50 shadow-lg">{timeData.hours}</div>
-                        <div className="text-lg font-medium text-gray-600 mt-2">HOURS</div>
-                      </div>
-                      <div className="flex flex-col items-center">
-                        <div className="text-6xl font-system-ui font-bold text-blue-600 border-4 border-gray-300 rounded-lg px-4 py-2 bg-gray-50 shadow-lg">{timeData.minutes}</div>
-                        <div className="text-lg font-medium text-gray-600 mt-2">MINUTES</div>
-                      </div>
-                      <div className="flex flex-col items-center">
-                        <div className="text-6xl font-system-ui font-bold text-blue-600 border-4 border-gray-300 rounded-lg px-4 py-2 bg-gray-50 shadow-lg">{timeData.seconds}</div>
-                        <div className="text-lg font-medium text-gray-600 mt-2">SECONDS</div>
-                      </div>
-                    </div>
-                  );
-                })()}
-                <p className="text-1.5xl font-medium text-gray-600">
-                  Time Remaining
-                </p>
-              </div>
 
-              {/* Progress Bar */}
-              <div className="max-w-4xl mx-auto px-8">
-                <div className="bg-gray-200 rounded-full h-6 overflow-hidden shadow-inner">
-                  <div
-                    className="h-full bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-1000 rounded-full"
-                    style={{
-                      width: `${((totalSeconds - (hours * 3600 + minutes * 60 + seconds)) / totalSeconds) * 100}%`
-                    }}
+                <div className="space-y-6" style={{ marginTop: '2rem' }}>
+                  {(() => {
+                    const timeData = formatTimeWithLabels(hours, minutes, seconds);
+                    return (
+                      <div className="flex justify-center items-center gap-8" style={{ marginBottom: '2.6rem' }}>
+
+                        <div className="flex flex-col items-center">
+                          <div className="text-6xl font-system-ui font-bold text-black border-4 border-gray-300 rounded-lg px-4 py-2 bg-gray-50 shadow-lg">{timeData.hours}</div>
+                          <div className="text-lg font-medium text-gray-600 mt-2">HOURS</div>
+                        </div>
+                        <div className="flex flex-col items-center">
+                          <div className="text-6xl font-system-ui font-bold text-black border-4 border-gray-300 rounded-lg px-4 py-2 bg-gray-50 shadow-lg">{timeData.minutes}</div>
+                          <div className="text-lg font-medium text-gray-600 mt-2">MINUTES</div>
+                        </div>
+                        <div className="flex flex-col items-center">
+                          <div className="text-6xl font-system-ui font-bold text-black border-4 border-gray-300 rounded-lg px-4 py-2 bg-gray-50 shadow-lg">{timeData.seconds}</div>
+                          <div className="text-lg font-medium text-gray-600 mt-2">SECONDS</div>
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                </div>
+
+                <div className="flex justify-between items-center" style={{ marginTop: '-24rem', marginBottom: '-2.4rem', marginLeft: '2rem', marginRight: '2rem' }}>
+                  <img
+                    src="/src/imgs/14.png"
+                    alt="Image 1"
+                    style={{ borderRadius: '50%', height: '21rem', marginBottom: '-2.0rem' }}
+                  />
+                  <img
+                    src="/src/imgs/15.png"
+                    alt="Image 2"
+                    style={{ borderRadius: '50%', height: '26rem', marginBottom: '-2.6rem' }}
                   />
                 </div>
-                <div className="text-center mt-4">
-                  <span className="text-2xl font-semibold text-gray-700">
-                    {Math.round(((totalSeconds - (hours * 3600 + minutes * 60 + seconds)) / totalSeconds) * 100)}%
-                  </span>
-                </div>
+
               </div>
 
-              {/* Did You Know Component - positioned below progress bar */}
-              {showDidYouKnow && (
-                <DidYouKnow
-                  animationTrigger={animationTrigger}
-                  isVisible={showDidYouKnow}
-                />
-              )}
+              {/* add images in row */}
+
+
+
+
+            </div>
+            <div className="flex-1 flex flex-col justify-center text-center space-y-12 mt--12">
+              <h1 className="text-4xl text-blue-800 tracking-widest uppercase"
+                style={{
+                  fontFamily: '"Arial Black", sans-serif',
+                  letterSpacing: '0.1em',
+                  marginTop: '2.5rem',
+                  marginLeft: '-3rem'
+                }}>
+                EAST GODAVARI & WEST GODAVARI
+              </h1>
+              <h1 className="text-4xl text-blue-800 tracking-widest uppercase"
+                style={{
+                  fontFamily: '"Arial Black", sans-serif',
+                  letterSpacing: '0.1em',
+                  marginTop: '0.5rem'
+                }}>
+                REGIONAL CENTER <span className="text-red-800 text-6xl">SEMI FINAL</span>
+              </h1>
             </div>
           </div>
+
+
         )}
       </div>
 
