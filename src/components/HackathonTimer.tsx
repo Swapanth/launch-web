@@ -371,7 +371,98 @@ export const HackathonTimer = () => {
           </div>
         ) : curtainState === 'opening' || curtainState === 'fading' ? (
           <div className="bg-white min-h-screen w-full flex flex-col">
-            {/* College Logo */}
+
+            {/* Event Details */}
+            <div className="flex-1 flex flex-col justify-center text-center space-y-12">
+              <div className="space-y-6  bg-yellow-400">
+                <h1 className="text-5xl text-green-800 tracking-widest uppercase"
+                  style={{
+                    fontFamily: '"Arial Black", sans-serif',
+                    letterSpacing: '0.1em',
+                    marginTop: '2.5rem'
+                  }}>
+                  AMARAVATI QUANTUM VALLEY
+
+                </h1>
+
+                <br />
+                <h1 className="text-5xl text-white p-3 bg-red-800 inline-block tracking-widest uppercase"
+                  style={{
+                    fontFamily: '"Arial Black", sans-serif',
+                    letterSpacing: '0.1em',
+                    marginTop: '-0.07rem',
+                    marginBottom: '2.5rem'
+                  }}>
+                  HACKATHON 2025
+                </h1>
+
+
+
+                <div className="space-y-6" style={{ marginTop: '2rem' }}>
+                  {(() => {
+                    const timeData = formatTimeWithLabels(hours, minutes, seconds);
+                    return (
+                      <div className="flex justify-center items-center gap-8" style={{ marginBottom: '2.6rem' }}>
+
+                        <div className="flex flex-col items-center">
+                          <div className="text-6xl font-system-ui font-bold text-black border-4 border-gray-300 rounded-lg px-4 py-2 bg-gray-50 shadow-lg">{timeData.hours}</div>
+                          <div className="text-lg font-medium text-gray-600 mt-2">HOURS</div>
+                        </div>
+                        <div className="flex flex-col items-center">
+                          <div className="text-6xl font-system-ui font-bold text-black border-4 border-gray-300 rounded-lg px-4 py-2 bg-gray-50 shadow-lg">{timeData.minutes}</div>
+                          <div className="text-lg font-medium text-gray-600 mt-2">MINUTES</div>
+                        </div>
+                        <div className="flex flex-col items-center">
+                          <div className="text-6xl font-system-ui font-bold text-black border-4 border-gray-300 rounded-lg px-4 py-2 bg-gray-50 shadow-lg">{timeData.seconds}</div>
+                          <div className="text-lg font-medium text-gray-600 mt-2">SECONDS</div>
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                </div>
+
+                <div className="flex justify-between items-center" style={{ marginTop: '-24rem', marginBottom: '-2.4rem', marginLeft: '2rem', marginRight: '2rem' }}>
+                  <img
+                    src="/imgs/14.png"
+                    alt="Image 1"
+                    style={{ borderRadius: '50%', height: '21rem', marginBottom: '-2.0rem' }}
+                  />
+                  <img
+                    src="/imgs/15.png"
+                    alt="Image 2"
+                    style={{ borderRadius: '50%', height: '26rem', marginBottom: '-2.6rem' }}
+                  />
+                </div>
+
+              </div>
+
+              {/* add images in row */}
+
+
+
+
+            </div>
+            <div className="flex-1 flex flex-col justify-center text-center space-y-12 mt--12">
+              <h1 className="text-4xl text-blue-800 tracking-widest uppercase"
+                style={{
+                  fontFamily: '"Arial Black", sans-serif',
+                  letterSpacing: '0.1em',
+                  marginTop: '2.5rem',
+                  marginLeft: '-3rem'
+                }}>
+                EAST GODAVARI & WEST GODAVARI
+              </h1>
+              <h1 className="text-4xl text-blue-800 tracking-widest uppercase"
+                style={{
+                  fontFamily: '"Arial Black", sans-serif',
+                  letterSpacing: '0.1em',
+                  marginTop: '0.5rem'
+                }}>
+                REGIONAL CENTER <span className="text-red-800 text-6xl">SEMI FINAL</span>
+              </h1>
+
+                          {/* College Logo */}
            <div className="flex justify-center pt-8 pb-6">
               <img
                 src="/imgs/17.png"
@@ -387,6 +478,13 @@ export const HackathonTimer = () => {
               />
             </div>
 
+            </div>
+            
+          </div>
+        ) : (
+          <div className="bg-white min-h-screen w-full flex flex-col">
+            
+
             {/* Event Details */}
             <div className="flex-1 flex flex-col justify-center text-center space-y-12">
               <div className="space-y-6  bg-yellow-400">
@@ -458,12 +556,12 @@ export const HackathonTimer = () => {
 
 
             </div>
-            <div className="flex-1 flex flex-col justify-center text-center space-y-12 mt--12">
+            <div className="flex-1 flex flex-col justify-center text-center space-y-12 ">
               <h1 className="text-4xl text-blue-800 tracking-widest uppercase"
                 style={{
                   fontFamily: '"Arial Black", sans-serif',
                   letterSpacing: '0.1em',
-                  marginTop: '2.5rem',
+                  marginTop: '-2.5rem',
                   marginLeft: '-3rem'
                 }}>
                 EAST GODAVARI & WEST GODAVARI
@@ -476,12 +574,9 @@ export const HackathonTimer = () => {
                 }}>
                 REGIONAL CENTER <span className="text-red-800 text-6xl">SEMI FINAL</span>
               </h1>
-            </div>
-          </div>
-        ) : (
-          <div className="bg-white min-h-screen w-full flex flex-col">
-            {/* College Logo */}
-            <div className="flex justify-center pt-8 pb-6">
+
+                          {/* College Logo */}
+           <div className="flex justify-center">
               <img
                 src="/imgs/17.png"
                 alt="Logo"
@@ -495,96 +590,6 @@ export const HackathonTimer = () => {
                 style={{ height: '4.5rem', marginLeft: '-3rem', marginTop: '-0.4rem' }}
               />
             </div>
-
-            {/* Event Details */}
-            <div className="flex-1 flex flex-col justify-center text-center space-y-12">
-              <div className="space-y-6  bg-yellow-400">
-                <h1 className="text-5xl text-green-800 tracking-widest uppercase"
-                  style={{
-                    fontFamily: '"Arial Black", sans-serif',
-                    letterSpacing: '0.1em',
-                    marginTop: '2.5rem'
-                  }}>
-                  AMARAVATI QUANTUM VALLEY
-
-                </h1>
-
-                <br />
-                <h1 className="text-5xl text-white p-3 bg-red-800 inline-block tracking-widest uppercase"
-                  style={{
-                    fontFamily: '"Arial Black", sans-serif',
-                    letterSpacing: '0.1em',
-                    marginTop: '-0.07rem',
-                    marginBottom: '2.5rem'
-                  }}>
-                  HACKATHON 2025
-                </h1>
-
-
-
-                <div className="space-y-6" style={{ marginTop: '2rem' }}>
-                  {(() => {
-                    const timeData = formatTimeWithLabels(hours, minutes, seconds);
-                    return (
-                      <div className="flex justify-center items-center gap-8" style={{ marginBottom: '2.6rem' }}>
-
-                        <div className="flex flex-col items-center">
-                          <div className="text-6xl font-system-ui font-bold text-black border-4 border-gray-300 rounded-lg px-4 py-2 bg-gray-50 shadow-lg">{timeData.hours}</div>
-                          <div className="text-lg font-medium text-gray-600 mt-2">HOURS</div>
-                        </div>
-                        <div className="flex flex-col items-center">
-                          <div className="text-6xl font-system-ui font-bold text-black border-4 border-gray-300 rounded-lg px-4 py-2 bg-gray-50 shadow-lg">{timeData.minutes}</div>
-                          <div className="text-lg font-medium text-gray-600 mt-2">MINUTES</div>
-                        </div>
-                        <div className="flex flex-col items-center">
-                          <div className="text-6xl font-system-ui font-bold text-black border-4 border-gray-300 rounded-lg px-4 py-2 bg-gray-50 shadow-lg">{timeData.seconds}</div>
-                          <div className="text-lg font-medium text-gray-600 mt-2">SECONDS</div>
-                        </div>
-                      </div>
-                    );
-                  })()}
-
-                </div>
-
-                <div className="flex justify-between items-center" style={{ marginTop: '-24rem', marginBottom: '-2.4rem', marginLeft: '2rem', marginRight: '2rem' }}>
-                  <img
-                    src="/imgs/14.png"
-                    alt="Image 1"
-                    style={{ borderRadius: '50%', height: '21rem', marginBottom: '-2.0rem' }}
-                  />
-                  <img
-                    src="/imgs/15.png"
-                    alt="Image 2"
-                    style={{ borderRadius: '50%', height: '26rem', marginBottom: '-2.6rem' }}
-                  />
-                </div>
-
-              </div>
-
-              {/* add images in row */}
-
-
-
-
-            </div>
-            <div className="flex-1 flex flex-col justify-center text-center space-y-12 mt--12">
-              <h1 className="text-4xl text-blue-800 tracking-widest uppercase"
-                style={{
-                  fontFamily: '"Arial Black", sans-serif',
-                  letterSpacing: '0.1em',
-                  marginTop: '2.5rem',
-                  marginLeft: '-3rem'
-                }}>
-                EAST GODAVARI & WEST GODAVARI
-              </h1>
-              <h1 className="text-4xl text-blue-800 tracking-widest uppercase"
-                style={{
-                  fontFamily: '"Arial Black", sans-serif',
-                  letterSpacing: '0.1em',
-                  marginTop: '0.5rem'
-                }}>
-                REGIONAL CENTER <span className="text-red-800 text-6xl">SEMI FINAL</span>
-              </h1>
             </div>
           </div>
 
