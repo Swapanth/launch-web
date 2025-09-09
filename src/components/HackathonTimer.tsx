@@ -304,9 +304,6 @@ export const HackathonTimer = () => {
     };
   };
 
-  const formatTime = (hours: number, minutes: number, seconds: number) => {
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-  };
 
   return (
     <div className={`relative w-full h-screen overflow-hidden ${curtainState === 'open' || curtainState === 'opening' || curtainState === 'fading' ? '' : 'gradient-stage'
@@ -405,15 +402,15 @@ export const HackathonTimer = () => {
                       <div className="flex justify-center items-center gap-8" style={{ marginBottom: '2.6rem' }}>
 
                         <div className="flex flex-col items-center">
-                          <div className="text-6xl font-system-ui font-bold text-black border-4 border-gray-300 rounded-lg px-4 py-2 bg-gray-50 shadow-lg">{timeData.hours}</div>
+                          <div className="text-6xl font-system-ui font-bold text-black border-4 border-red-800 rounded-lg px-4 py-2 bg-gray-50 shadow-lg">{timeData.hours}</div>
                           <div className="text-lg font-medium text-gray-600 mt-2">HOURS</div>
                         </div>
                         <div className="flex flex-col items-center">
-                          <div className="text-6xl font-system-ui font-bold text-black border-4 border-gray-300 rounded-lg px-4 py-2 bg-gray-50 shadow-lg">{timeData.minutes}</div>
+                          <div className="text-6xl font-system-ui font-bold text-black border-4 border-red-800 rounded-lg px-4 py-2 bg-gray-50 shadow-lg">{timeData.minutes}</div>
                           <div className="text-lg font-medium text-gray-600 mt-2">MINUTES</div>
                         </div>
                         <div className="flex flex-col items-center">
-                          <div className="text-6xl font-system-ui font-bold text-black border-4 border-gray-300 rounded-lg px-4 py-2 bg-gray-50 shadow-lg">{timeData.seconds}</div>
+                          <div className="text-6xl font-system-ui font-bold text-black border-4 border-red-800 rounded-lg px-4 py-2 bg-gray-50 shadow-lg">{timeData.seconds}</div>
                           <div className="text-lg font-medium text-gray-600 mt-2">SECONDS</div>
                         </div>
                       </div>
@@ -448,7 +445,7 @@ export const HackathonTimer = () => {
                 style={{
                   fontFamily: '"Arial Black", sans-serif',
                   letterSpacing: '0.1em',
-                  marginTop: '2.5rem',
+                  marginTop: '1.5rem',
                   marginLeft: '-3rem'
                 }}>
                 EAST GODAVARI & WEST GODAVARI
@@ -561,7 +558,7 @@ export const HackathonTimer = () => {
                 style={{
                   fontFamily: '"Arial Black", sans-serif',
                   letterSpacing: '0.1em',
-                  marginTop: '-2.5rem',
+                  marginTop: '1.5rem',
                   marginLeft: '-3rem'
                 }}>
                 EAST GODAVARI & WEST GODAVARI
