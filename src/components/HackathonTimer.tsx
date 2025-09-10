@@ -402,15 +402,15 @@ export const HackathonTimer = () => {
                       <div className="flex justify-center items-center gap-8" style={{ marginBottom: '2.6rem' }}>
 
                         <div className="flex flex-col items-center">
-                          <div className="text-6xl font-system-ui font-bold text-black border-4 border-red-800 rounded-lg px-4 py-2 bg-gray-50 shadow-lg">{timeData.hours}</div>
+                          <div className="text-9xl font-system-ui font-bold text-black border-4 border-red-800 rounded-lg px-4 py-2 bg-gray-50 shadow-lg">{timeData.hours}</div>
                           <div className="text-lg font-medium text-gray-600 mt-2">HOURS</div>
                         </div>
                         <div className="flex flex-col items-center">
-                          <div className="text-6xl font-system-ui font-bold text-black border-4 border-red-800 rounded-lg px-4 py-2 bg-gray-50 shadow-lg">{timeData.minutes}</div>
+                          <div className="text-9xl font-system-ui font-bold text-black border-4 border-red-800 rounded-lg px-4 py-2 bg-gray-50 shadow-lg">{timeData.minutes}</div>
                           <div className="text-lg font-medium text-gray-600 mt-2">MINUTES</div>
                         </div>
                         <div className="flex flex-col items-center">
-                          <div className="text-6xl font-system-ui font-bold text-black border-4 border-red-800 rounded-lg px-4 py-2 bg-gray-50 shadow-lg">{timeData.seconds}</div>
+                          <div className="text-9xl font-system-ui font-bold text-black border-4 border-red-800 rounded-lg px-4 py-2 bg-gray-50 shadow-lg">{timeData.seconds}</div>
                           <div className="text-lg font-medium text-gray-600 mt-2">SECONDS</div>
                         </div>
                       </div>
@@ -515,15 +515,15 @@ export const HackathonTimer = () => {
                       <div className="flex justify-center items-center gap-8" style={{ marginBottom: '2.6rem' }}>
 
                         <div className="flex flex-col items-center">
-                          <div className="text-6xl font-system-ui font-bold text-black border-4 border-red-800 rounded-lg px-4 py-2 bg-gray-50 shadow-lg">{timeData.hours}</div>
+                          <div className="text-9xl font-system-ui font-bold text-black border-4 border-red-800 rounded-lg px-4 py-2 bg-gray-50 shadow-lg">{timeData.hours}</div>
                           <div className="text-lg font-medium text-gray-600 mt-2">HOURS</div>
                         </div>
                         <div className="flex flex-col items-center">
-                          <div className="text-6xl font-system-ui font-bold text-black border-4 border-red-800 rounded-lg px-4 py-2 bg-gray-50 shadow-lg">{timeData.minutes}</div>
+                          <div className="text-9xl font-system-ui font-bold text-black border-4 border-red-800 rounded-lg px-4 py-2 bg-gray-50 shadow-lg">{timeData.minutes}</div>
                           <div className="text-lg font-medium text-gray-600 mt-2">MINUTES</div>
                         </div>
                         <div className="flex flex-col items-center">
-                          <div className="text-6xl font-system-ui font-bold text-black border-4 border-red-800 rounded-lg px-4 py-2 bg-gray-50 shadow-lg">{timeData.seconds}</div>
+                          <div className="text-9xl font-system-ui font-bold text-black border-4 border-red-800 rounded-lg px-4 py-2 bg-gray-50 shadow-lg">{timeData.seconds}</div>
                           <div className="text-lg font-medium text-gray-600 mt-2">SECONDS</div>
                         </div>
                       </div>
